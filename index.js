@@ -4,7 +4,7 @@ const axios = require("axios");
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
-  apiKey: process.env.API_KEY,
+  apiKey: "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",
 });
 
 const bot = new Telegraf("6741874098:AAGCTH6SeD5m4JpaLk4ni4acVUzASuwel3w");
@@ -32,7 +32,7 @@ bot.command("image", async (ctx) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.API_KEY}`,
+          Authorization: `Bearer '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'`,
           "Content-Type": "application/json",
         },
       }
