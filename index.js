@@ -58,7 +58,7 @@ bot.on("text", async (ctx) => {
   } catch (error) {
     console.error("Ошибка при получении ответа от OpenAI:", error);
     ctx.reply("Извини, произошла ошибка.");
-    console.log(userMessage);
+    console.log(ctx.message.text);
   }
 });
 
