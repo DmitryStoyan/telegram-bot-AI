@@ -53,10 +53,12 @@ bot.on("text", async (ctx) => {
       messages: [{ role: "user", content: userMessage }],
     });
     const reply = openAIResponse.choices[0].message.content;
+    console.log(userMessage);
     ctx.reply(reply);
   } catch (error) {
     console.error("Ошибка при получении ответа от OpenAI:", error);
     ctx.reply("Извини, произошла ошибка.");
+    console.log(userMessage);
   }
 });
 
