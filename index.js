@@ -56,7 +56,9 @@ bot.on("text", async (ctx) => {
     ctx.reply(reply);
   } catch (error) {
     console.error("Ошибка при получении ответа от OpenAI:", error);
-    ctx.reply("Ошибка при получении ответа от OpenAI:", error);
+    ctx.reply(
+      `"Ошибка при получении ответа от OpenAI:", Подробности: ${error.message}`
+    );
   }
 });
 
