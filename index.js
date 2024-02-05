@@ -4,10 +4,10 @@ const axios = require("axios");
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-const bot = new Telegraf("6741874098:AAGCTH6SeD5m4JpaLk4ni4acVUzASuwel3w");
+const bot = new Telegraf(process.env.TELEGRAM_API_KEY);
 
 bot.start((ctx) =>
   ctx.reply(
@@ -15,35 +15,35 @@ bot.start((ctx) =>
   )
 );
 
-// bot.command("image", async (ctx) => {
-//   const description = ctx.message.text.split(" ").slice(1).join(" ");
-//   if (!description) {
-//     return ctx.reply("Пожалуйста, укажите описание для картинки.");
-//   }
+bot.command("image", async (ctx) => {
+  const description = ctx.message.text.split(" ").slice(1).join(" ");
+  if (!description) {
+    return ctx.reply("Пожалуйста, укажите описание для картинки.");
+  }
 
-//   // Запрос к DALL-E API для генерации изображения
-//   try {
-//     const response = await axios.post(
-//       "https://api.openai.com/v1/images/generations",
-//       {
-//         prompt: description,
-//         n: 1,
-//         size: "1024x1024",
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer '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'`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     const imageUrl = response.data.data[0].url;
-//     ctx.replyWithPhoto({ url: imageUrl });
-//   } catch (error) {
-//     console.error("Ошибка при генерации изображения:", error);
-//     ctx.reply("Извини, произошла ошибка при генерации изображения.");
-//   }
-// });
+  // Запрос к DALL-E API для генерации изображения
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/images/generations",
+      {
+        prompt: description,
+        n: 1,
+        size: "1024x1024",
+      },
+      {
+        headers: {
+          Authorization: `Bearer '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'`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const imageUrl = response.data.data[0].url;
+    ctx.replyWithPhoto({ url: imageUrl });
+  } catch (error) {
+    console.error("Ошибка при генерации изображения:", error);
+    ctx.reply("Извини, произошла ошибка при генерации изображения.");
+  }
+});
 
 bot.on("text", async (ctx) => {
   try {
@@ -53,12 +53,10 @@ bot.on("text", async (ctx) => {
       messages: [{ role: "user", content: userMessage }],
     });
     const reply = openAIResponse.choices[0].message.content;
-    console.log(userMessage);
     ctx.reply(reply);
   } catch (error) {
     console.error("Ошибка при получении ответа от OpenAI:", error);
     ctx.reply("Извини, произошла ошибка.");
-    console.log(ctx.message.text);
   }
 });
 
