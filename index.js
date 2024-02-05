@@ -32,7 +32,7 @@ bot.command("image", async (ctx) => {
       },
       {
         headers: {
-          Authorization: `Bearer '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'`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
