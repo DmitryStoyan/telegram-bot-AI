@@ -2,12 +2,26 @@ require("dotenv").config();
 const { Telegraf } = require("telegraf");
 const axios = require("axios");
 const OpenAI = require("openai");
+const mongoose = require("mongoose");
+const User = require("./models/users.js");
+
+const db = `mongodb+srv://dimastamc:${process.env.DB_PASSWORD}@cluster0.avg14zw.mongodb.net/node-uesrs?retryWrites=true&w=majority`;
+
+mongoose
+  .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((res) => console.log("Connected to DB"))
+  .catch((error) => console.log(error));
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const bot = new Telegraf(process.env.TELEGRAM_API_KEY);
+
+bot.telegram.setMyCommands([
+  { command: "/start", description: "Начальное приветствие" },
+  { command: "/info", description: "Получить информацию о боте" },
+]);
 
 bot.start((ctx) =>
   ctx.reply(
@@ -46,7 +60,25 @@ bot.command("image", async (ctx) => {
 });
 
 bot.on("text", async (ctx) => {
+  const userId = ctx.message.from.id.toString();
+  const {
+    first_name: firstName,
+    last_name: lastName,
+    username,
+  } = ctx.message.from;
+
   try {
+    let user = await User.findOne({ userId: userId });
+    if (user) {
+      user.firstName = firstName;
+      user.lastName = lastName;
+      user.username = username;
+      await user.save();
+    } else {
+      user = new User({ userId, firstName, lastName, username });
+      await user.save();
+    }
+
     const userMessage = ctx.message.text;
     const openAIResponse = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -55,8 +87,8 @@ bot.on("text", async (ctx) => {
     const reply = openAIResponse.choices[0].message.content;
     ctx.reply(reply);
   } catch (error) {
-    console.error("Ошибка при получении ответа от OpenAI:", error);
-    ctx.reply(`"Ошибка при получении ответа от OpenAI:", Подробности: `);
+    console.error("Ошибка при работе с базой данных:", error);
+    ctx.reply("Произошла ошибка при сохранении информации о пользователе.");
   }
 });
 
