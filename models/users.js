@@ -7,6 +7,8 @@ const usersSchema = new Schema({
   lastName: { type: String, required: false },
   username: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
+  imageCount: { type: Number, default: 0 },
+  textCount: { type: Number, default: 0 },
 });
 
 const User = mongoose.model("User", usersSchema);

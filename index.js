@@ -5,6 +5,7 @@ const OpenAI = require("openai");
 const mongoose = require("mongoose");
 const User = require("./models/users.js");
 
+// Подключение к MongoDB
 const db = `mongodb+srv://dimastamc:${process.env.DB_PASSWORD}@cluster0.avg14zw.mongodb.net/node-uesrs?retryWrites=true&w=majority`;
 
 mongoose
@@ -35,7 +36,6 @@ bot.command("image", async (ctx) => {
     return ctx.reply("Пожалуйста, укажите описание для картинки.");
   }
 
-  // Запрос к DALL-E API для генерации изображения
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/images/generations",
@@ -53,6 +53,13 @@ bot.command("image", async (ctx) => {
     );
     const imageUrl = response.data.data[0].url;
     ctx.replyWithPhoto({ url: imageUrl });
+
+    const userId = ctx.message.from.id.toString();
+    await User.findOneAndUpdate(
+      { userId },
+      { $inc: { imageCount: 1 } },
+      { new: true }
+    );
   } catch (error) {
     console.error("Ошибка при генерации изображения:", error);
     ctx.reply("Извини, произошла ошибка при генерации изображения.");
@@ -73,9 +80,10 @@ bot.on("text", async (ctx) => {
       user.firstName = firstName;
       user.lastName = lastName;
       user.username = username;
+      user.textCount += 1;
       await user.save();
     } else {
-      user = new User({ userId, firstName, lastName, username });
+      user = new User({ userId, firstName, lastName, username, textCount: 1 });
       await user.save();
     }
 
@@ -87,8 +95,8 @@ bot.on("text", async (ctx) => {
     const reply = openAIResponse.choices[0].message.content;
     ctx.reply(reply);
   } catch (error) {
-    console.error("Ошибка при работе с базой данных:", error);
-    ctx.reply("Произошла ошибка при сохранении информации о пользователе.");
+    console.error("Ошибка ", error);
+    ctx.reply("Произошла ошибка.");
   }
 });
 
